@@ -1,0 +1,6 @@
+openai_usage_tracker.dashboard:
+  title: 'OpenAI Usage Tracker'
+  description: 'View OpenAI API usage by module and user.'
+  parent: system.admin_reports
+  route_name: openai_usage_tracker.dashboard
+  weight: 10

@@ -1,0 +1,7 @@
+openai_usage_tracker.dashboard:
+  path: '/admin/reports/openai-usage'
+  defaults:
+    _controller: '\Drupal\openai_usage_tracker\Controller\UsageDashboardController::view'
+    _title: 'OpenAI Usage Dashboard'
+  requirements:
+    _permission: 'access administration pages'

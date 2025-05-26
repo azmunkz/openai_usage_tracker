@@ -1,0 +1,4 @@
+services:
+  openai_usage_tracker.logger:
+    class: Drupal\openai_usage_tracker\Service\OpenAIUsageLogger
+    arguments: ['@database', '@current_user']
