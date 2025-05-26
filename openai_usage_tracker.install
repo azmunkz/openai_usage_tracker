@@ -1,0 +1,72 @@
+<?php
+
+/**
+ * @file
+ * Install file for OpenAI Usage Tracker
+ */
+
+/**
+ * Implements hook_schema())
+ */
+function openai_usage_tracker_schema()
+{
+  $schema['openai_usage_log'] = [
+    'description' => 'Track OpenAI API usage by module and user.',
+    'fields' => [
+      'id' => [
+        'type' => 'serial',
+        'not null' => TRUE,
+      ],
+      'module' => [
+        'type' => 'varchar',
+        'not null' => TRUE,
+      ],
+      'user_id' => [
+        'type' => 'int',
+        'not null' => TRUE,
+      ],
+      'model' => [
+        'type' => 'varchar',
+        'length' => 64,
+        'not null' => TRUE,
+      ],
+      'endpoint' => [
+        'type' => 'varchar',
+        'length' => 128,
+        'not null' => TRUE,
+      ],
+      'prompt_tokens' => [
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ],
+      'completion_tokens' => [
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ],
+      'total_tokens' => [
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ],
+      'cost' => [
+        'type' => 'float',
+        'not null' => TRUE,
+        'default' => 0,
+      ],
+      'created' => [
+        'type' => 'int',
+        'not null' => TRUE,
+      ],
+    ],
+    'primary key' => ['id'],
+    'indexes' => [
+      'user_id' => ['user_id'],
+      'module' => ['module'],
+      'created' => ['created'],
+    ],
+  ];
+
+  return $schema;
+}

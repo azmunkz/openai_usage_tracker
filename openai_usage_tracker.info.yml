@@ -1,0 +1,7 @@
+name: OpenAI Usage Tracker
+type: module
+description: 'Track OpenAI API usage by module and user.'
+core_version_requirement: ^10 || ^11
+package: custom
+dependencies:
+  - user
