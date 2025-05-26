@@ -2,14 +2,13 @@
 
 /**
  * @file
- * Install file for OpenAI Usage Tracker
+ * Install file for OpenAI Usage Tracker.
  */
 
 /**
- * Implements hook_schema())
+ * Implements hook_schema().
  */
-function openai_usage_tracker_schema()
-{
+function openai_usage_tracker_schema() {
   $schema['openai_usage_log'] = [
     'description' => 'Track OpenAI API usage by module and user.',
     'fields' => [
@@ -19,6 +18,7 @@ function openai_usage_tracker_schema()
       ],
       'module' => [
         'type' => 'varchar',
+        'length' => 128,
         'not null' => TRUE,
       ],
       'user_id' => [
