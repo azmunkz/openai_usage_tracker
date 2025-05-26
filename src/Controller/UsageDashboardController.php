@@ -69,8 +69,23 @@ class UsageDashboardController extends ControllerBase {
       'Prompt', 'Completion', 'Total', 'Cost (USD)', 'Timestamp'
     ];
 
+    $summary = $this->getSummary($filters);
+
     return [
       'form' => $this->formBuilder()->getForm(FilterForm::class),
+      'summary' => [
+        '#type' => 'container',
+        '#attributes' => ['class' => ['usage-summary', 'mb-4']],
+        'cost' => [
+          '#markup' => '<div><strong>Total Spend:</strong> $' . number_format($summary['cost'], 4) . '</div>',
+        ],
+        'tokens' => [
+          '#markup' => '<div><strong>Total Tokens:</strong> ' . number_format($summary['tokens']) . '</div>',
+        ],
+        'requests' => [
+          '#markup' => '<div><strong>Total Requests:</strong> ' . $summary['requests'] . '</div>',
+        ],
+      ],
       'table' => [
         '#type' => 'table',
         '#header' => $header,
@@ -79,6 +94,38 @@ class UsageDashboardController extends ControllerBase {
         '#attributes' => ['class' => ['usage-log-table']],
       ],
     ];
+
   }
+
+  private function getSummary(array $filters) {
+    $query = $this->database->select('openai_usage_log', 'log')
+      ->fields('log', ['total_tokens', 'cost']);
+
+    // Apply filters
+    foreach ($filters as $field => $value) {
+      if (!empty($value)) {
+        $query->condition($field, $value);
+      }
+    }
+
+    $results = $query->execute();
+
+    $total_tokens = 0;
+    $total_cost = 0.0;
+    $total_requests = 0;
+
+    foreach ($results as $row) {
+      $total_tokens += $row->total_tokens;
+      $total_cost += $row->cost;
+      $total_requests++;
+    }
+
+    return [
+      'tokens' => $total_tokens,
+      'cost' => $total_cost,
+      'requests' => $total_requests,
+    ];
+  }
+
 
 }
