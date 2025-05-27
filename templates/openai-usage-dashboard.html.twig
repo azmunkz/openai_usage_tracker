@@ -71,39 +71,23 @@
   </div>
 </div>
 
-{#<div class="dashboard-endpoint-cards mb-4">#}
-{#  <h3>Breakdown by Endpoint</h3>#}
-{#  <div class="grid" style="#}
-{#  display: grid;#}
-{#  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));#}
-{#  gap: 1rem;#}
-{#">#}
-{#    {% for endpoint, stat in endpoint_stats %}#}
-{#      <div class="card" style="background: #f3e8ff; border: 1px solid #ddd; border-radius: 6px; padding: 1rem; width: 240px;">#}
-{#        <div style="font-weight: bold;">{{ endpoint }}</div>#}
-{#        <div>Requests: {{ stat.requests }}</div>#}
-{#        <div>Tokens: {{ stat.tokens|number_format }}</div>#}
-{#        <div>Cost: ${{ stat.cost|number_format(4) }}</div>#}
-{#      </div>#}
-{#    {% endfor %}#}
-{#  </div>#}
-{#</div>#}
-
 <div class="container mb-4">
   <h3 class="mb-3 border-bottom">Breakdown by Model</h3>
   <div class="row g-3">
     {% if model_stats %}
       {% for model, stat in model_stats %}
-        <div class="card border-info shadow-sm">
-          <div class="card-header bg-info text-white fw-blod">
-            {{ model }}
-          </div>
-          <div class="card-body">
-            <p class="mb-1">Requests: {{ stat.requests }}</p>
-            <p class="mb-1">Prompt Tokens: {{ stat.prompt|number_format }}</p>
-            <p class="mb-1">Completion Tokens: {{ stat.completion|number_format }}</p>
-            <p class="mb-1">Total Tokens: {{ stat.total_tokens|number_format }}</p>
-            <p class="mb-1">Cost: ${{ stat.cost|number_format(4) }}</p>
+        <div class="col-md-4">
+          <div class="card border-info shadow-sm">
+            <div class="card-header bg-info text-white fw-bold">
+              {{ model }}
+            </div>
+            <div class="card-body">
+              <p class="mb-1">Requests: {{ stat.requests }}</p>
+              <p class="mb-1">Prompt Tokens: {{ stat.prompt|number_format }}</p>
+              <p class="mb-1">Completion Tokens: {{ stat.completion|number_format }}</p>
+              <p class="mb-1">Total Tokens: {{ stat.total_tokens|number_format }}</p>
+              <p class="mb-1">Cost: ${{ stat.cost|number_format(4) }}</p>
+            </div>
           </div>
         </div>
       {% endfor %}
@@ -112,67 +96,29 @@
     {% endif %}
   </div>
 </div>
-
-{#<div class="dashboard-model-cards mb-4">#}
-{#  <h3>Breakdown by Model</h3>#}
-{#  <div class="grid" style="#}
-{#  display: grid;#}
-{#  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));#}
-{#  gap: 1rem;#}
-{#">#}
-{#    {% for model, stat in model_stats %}#}
-{#      <div class="card" style="background: #e0f2fe; border: 1px solid #bee3f8; border-radius: 6px; padding: 1rem; width: 240px;">#}
-{#        <div style="font-weight: bold;">{{ model }}</div>#}
-{#        <div>Requests: {{ stat.requests }}</div>#}
-{#        <div>Prompt Tokens: {{ stat.prompt|number_format }}</div>#}
-{#        <div>Completion Tokens: {{ stat.completion|number_format }}</div>#}
-{#        <div>Total Tokens: {{ stat.total_tokens|number_format }}</div>#}
-{#        <div>Cost: ${{ stat.cost|number_format(4) }}</div>#}
-{#      </div>#}
-{#    {% endfor %}#}
-{#  </div>#}
-{#</div>#}
 
 <div class="container mb-4">
   <h3 class="mb-3 border-bottom">Breakdown by Module</h3>
   <div class="row g-3">
     {% if module_stats %}
       {% for module, stat in module_stats %}
-        <div class="card border-warning text-white fw-bold">
-          <div class="card-header bg-warning text-white fw-bold">
-            {{ module }}
-          </div>
-          <div class="card-body">
-            <p class="mb-1">Requests: {{ stat.requests }}</p>
-            <p class="mb-1">Prompt Tokens: {{ stat.prompt|number_format }}</p>
-            <p class="mb-1">Completion Tokens: {{ stat.completion|number_format }}</p>
-            <p class="mb-1">Total Tokens: {{ stat.total_tokens|number_format }}</p>
-            <p class="mb-1">Cost: ${{ stat.cost|number_format(4) }}</p>p class="mb-1"
-          </div>
-        </div>
+       <div class="col-md-4">
+         <div class="card border-info shadow-sm">
+           <div class="card-header bg-warning text-white fw-bold">
+             {{ module }}
+           </div>
+           <div class="card-body">
+             <p class="mb-1">Requests: {{ stat.requests }}</p>
+             <p class="mb-1">Prompt Tokens: {{ stat.prompt|number_format }}</p>
+             <p class="mb-1">Completion Tokens: {{ stat.completion|number_format }}</p>
+             <p class="mb-1">Total Tokens: {{ stat.total_tokens|number_format }}</p>
+             <p class="mb-1">Cost: ${{ stat.cost|number_format(4) }}</p>
+           </div>
+         </div>
+       </div>
       {% endfor %}
     {% else %}
       <p class="my-4">No data to be display</p>
     {% endif %}
   </div>
 </div>
-
-{#<div class="dashboard-module-cards mb-4">#}
-{#  <h3>Breakdown by Module</h3>#}
-{#  <div class="grid" style="#}
-{#  display: grid;#}
-{#  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));#}
-{#  gap: 1rem;#}
-{#">#}
-{#    {% for module, stat in module_stats %}#}
-{#      <div class="card" style="background: #fff9c4; border: 1px solid #fce7a4; border-radius: 6px; padding: 1rem; width: 240px;">#}
-{#        <div style="font-weight: bold;">{{ module }}</div>#}
-{#        <div>Requests: {{ stat.requests }}</div>#}
-{#        <div>Prompt Tokens: {{ stat.prompt|number_format }}</div>#}
-{#        <div>Completion Tokens: {{ stat.completion|number_format }}</div>#}
-{#        <div>Total Tokens: {{ stat.total_tokens|number_format }}</div>#}
-{#        <div>Cost: ${{ stat.cost|number_format(4) }}</div>#}
-{#      </div>#}
-{#    {% endfor %}#}
-{#  </div>#}
-{#</div>#}
