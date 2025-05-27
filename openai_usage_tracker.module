@@ -1,0 +1,19 @@
+<?php
+/**
+ * Implements hook_theme().
+ */
+function openai_usage_tracker_theme($existing, $type, $theme, $path) {
+  return [
+    'openai_usage_dashboard' => [
+      'variables' => [
+        'form' => NULL,
+        'summary' => [],
+        'daily_chart_data' => [],
+        'endpoint_stats' => [],
+        'table' => [],
+      ],
+      'template' => 'openai-usage-dashboard',
+    ],
+  ];
+}
+

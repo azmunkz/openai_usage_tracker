@@ -1,0 +1,15 @@
+<div class="dashboard-endpoint-cards mb-4">
+  <h3>Breakdown by Endpoint</h3>
+  <div class="endpoint-grid" style="display: flex; flex-wrap: wrap; gap: 1rem;">
+    {% for endpoint, stat in endpoint_stats %}
+      <div class="card" style="border: 1px solid #ddd; border-radius: 6px; padding: 1rem; width: 220px; background: #f9f9f9;">
+        <div style="font-weight: bold; font-size: 1.1rem;">{{ endpoint }}</div>
+        <div>Requests: {{ stat.requests }}</div>
+        <div>Tokens: {{ stat.tokens|number_format }}</div>
+        <div>Cost: ${{ stat.cost|number_format(4) }}</div>
+      </div>
+    {% else %}
+      <p>No data found.</p>
+    {% endfor %}
+  </div>
+</div>

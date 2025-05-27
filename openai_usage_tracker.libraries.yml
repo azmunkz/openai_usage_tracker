@@ -1,0 +1,9 @@
+chart:
+  version: 1.x
+  js:
+    https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js: { type: external, minified: true }
+    js/chart-render.js: {}
+  dependencies:
+    - core/jquery
+    - core/drupal
+    - core/drupalSettings

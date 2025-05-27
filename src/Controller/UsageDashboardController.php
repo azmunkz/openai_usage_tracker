@@ -70,28 +70,37 @@ class UsageDashboardController extends ControllerBase {
     ];
 
     $summary = $this->getSummary($filters);
+    $daily_data = $this->getDailyTokenData($filters);
+    $endpoint_stats = $this->getEndpointStats($filters);
+
+    \Drupal::logger('openai_usage_tracker')->notice('Endpoint Stats: <pre>@stats</pre>', [
+      '@stats' => print_r($endpoint_stats, TRUE),
+    ]);
+
 
     return [
-      'form' => $this->formBuilder()->getForm(FilterForm::class),
-      'summary' => [
-        '#type' => 'container',
-        '#attributes' => ['class' => ['usage-summary', 'mb-4']],
-        'cost' => [
-          '#markup' => '<div><strong>Total Spend:</strong> $' . number_format($summary['cost'], 4) . '</div>',
-        ],
-        'tokens' => [
-          '#markup' => '<div><strong>Total Tokens:</strong> ' . number_format($summary['tokens']) . '</div>',
-        ],
-        'requests' => [
-          '#markup' => '<div><strong>Total Requests:</strong> ' . $summary['requests'] . '</div>',
-        ],
+      '#theme' => 'openai_usage_dashboard',
+      '#form' => $this->formBuilder()->getForm(FilterForm::class),
+      '#summary' => $summary,
+      '#daily_chart_data' => [
+        'labels' => array_keys($daily_data),
+        'tokens' => array_values($daily_data),
       ],
-      'table' => [
+      '#endpoint_stats' => $endpoint_stats,
+      '#table' => [
         '#type' => 'table',
         '#header' => $header,
         '#rows' => $rows,
         '#empty' => $this->t('No usage data found.'),
-        '#attributes' => ['class' => ['usage-log-table']],
+      ],
+      '#attached' => [
+        'library' => ['openai_usage_tracker/chart'],
+        'drupalSettings' => [
+          'openaiUsageChart' => [
+            'labels' => array_keys($daily_data),
+            'tokens' => array_values($daily_data),
+          ],
+        ],
       ],
     ];
 
@@ -125,6 +134,62 @@ class UsageDashboardController extends ControllerBase {
       'cost' => $total_cost,
       'requests' => $total_requests,
     ];
+  }
+
+  private function getDailyTokenData(array $filters) {
+    $query = $this->database->select('openai_usage_log', 'log')
+      ->fields('log', ['created', 'total_tokens']);
+
+    foreach ($filters as $field => $value) {
+      if (!empty($value)) {
+        $query->condition($field, $value);
+      }
+    }
+
+    $results = $query->execute();
+
+    $daily = [];
+
+    foreach ($results as $row) {
+      $date = date('Y-m-d', $row->created);
+      $daily[$date] = ($daily[$date] ?? 0) + $row->total_tokens;
+    }
+
+    ksort($daily); // Sort by date
+
+    return $daily;
+  }
+
+  private function getEndpointStats(array $filters) {
+    $query = $this->database->select('openai_usage_log', 'log')
+      ->fields('log', ['endpoint', 'total_tokens', 'cost']);
+
+    foreach ($filters as $field => $value) {
+      if (!empty($value)) {
+        $query->condition($field, $value);
+      }
+    }
+
+    $results = $query->execute();
+
+    $stats = [];
+
+    foreach ($results as $row) {
+      $endpoint = $row->endpoint;
+      if (!isset($stats[$endpoint])) {
+        $stats[$endpoint] = [
+          'tokens' => 0,
+          'cost' => 0.0,
+          'requests' => 0,
+        ];
+      }
+
+      $stats[$endpoint]['tokens'] += $row->total_tokens;
+      $stats[$endpoint]['cost'] += $row->cost;
+      $stats[$endpoint]['requests'] += 1;
+    }
+
+    return $stats;
   }
 
 
