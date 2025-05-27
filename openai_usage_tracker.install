@@ -55,6 +55,20 @@ function openai_usage_tracker_schema() {
         'not null' => TRUE,
         'default' => 0,
       ],
+      'content_type' => [
+        'type' => 'varchar',
+        'length' => 64,
+        'not null' => FALSE,
+      ],
+      'node_id' => [
+        'type' => 'int',
+        'not null' => FALSE,
+      ],
+      'title' => [
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => FALSE,
+      ],
       'created' => [
         'type' => 'int',
         'not null' => TRUE,

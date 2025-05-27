@@ -72,11 +72,23 @@ class UsageDashboardController extends ControllerBase {
     $summary = $this->getSummary($filters);
     $daily_data = $this->getDailyTokenData($filters);
     $endpoint_stats = $this->getEndpointStats($filters);
+    $model_stats = $this->getModelStats($filters);
+    $module_stats = $this->getModuleStats($filters);
+    $summary = $this->getSummary($filters);
 
-    \Drupal::logger('openai_usage_tracker')->notice('Endpoint Stats: <pre>@stats</pre>', [
-      '@stats' => print_r($endpoint_stats, TRUE),
-    ]);
+    $alert_message = NULL;
 
+    if ($summary['cost'] >= 0.01) {
+      $alert_message = [
+        'level' => 'danger',
+        'text' => '⚠️ You have exceeded USD10.00 in OpenAI usage. Please monitor your tokens and budget.',
+      ];
+    } elseif ($summary['cost'] >= 5) {
+      $alert_message = [
+        'level' => 'warning',
+        'text' => '⚠️ Your usage is above USD5.00. Monitor usage to avoid over-budget.',
+      ];
+    }
 
     return [
       '#theme' => 'openai_usage_dashboard',
@@ -87,6 +99,9 @@ class UsageDashboardController extends ControllerBase {
         'tokens' => array_values($daily_data),
       ],
       '#endpoint_stats' => $endpoint_stats,
+      '#model_stats' => $model_stats,
+      '#module_stats' => $module_stats,
+      '#alert_message' => $alert_message,
       '#table' => [
         '#type' => 'table',
         '#header' => $header,
@@ -94,7 +109,8 @@ class UsageDashboardController extends ControllerBase {
         '#empty' => $this->t('No usage data found.'),
       ],
       '#attached' => [
-        'library' => ['openai_usage_tracker/chart'],
+
+        'library' => ['openai_usage_tracker/chart', 'openai_usage_tracker/bootstrap'],
         'drupalSettings' => [
           'openaiUsageChart' => [
             'labels' => array_keys($daily_data),
@@ -192,5 +208,137 @@ class UsageDashboardController extends ControllerBase {
     return $stats;
   }
 
+  private function getModelStats(array $filters) {
+    $query = $this->database->select('openai_usage_log', 'log')
+      ->fields('log', ['model', 'prompt_tokens', 'completion_tokens', 'total_tokens', 'cost']);
+
+    foreach ($filters as $field => $value) {
+      if (!empty($value)) {
+        $query->condition($field, $value);
+      }
+    }
+
+    $results = $query->execute();
+    $stats = [];
+
+    foreach ($results as $row) {
+      $model = $row->model;
+      if (!isset($stats[$model])) {
+        $stats[$model] = [
+          'requests' => 0,
+          'prompt' => 0,
+          'completion' => 0,
+          'total_tokens' => 0,
+          'cost' => 0.0,
+        ];
+      }
+
+      $stats[$model]['requests'] += 1;
+      $stats[$model]['prompt'] += $row->prompt_tokens;
+      $stats[$model]['completion'] += $row->completion_tokens;
+      $stats[$model]['total_tokens'] += $row->total_tokens;
+      $stats[$model]['cost'] += $row->cost;
+    }
+
+    return $stats;
+  }
+
+  private function getModuleStats(array $filters) {
+    $query = $this->database->select('openai_usage_log', 'log')
+      ->fields('log', ['module', 'prompt_tokens', 'completion_tokens', 'total_tokens', 'cost']);
+
+    foreach ($filters as $field => $value) {
+      if (!empty($value)) {
+        $query->condition($field, $value);
+      }
+    }
+
+    $results = $query->execute();
+    $stats = [];
+
+    foreach ($results as $row) {
+      $module = $row->module;
+      if (!isset($stats[$module])) {
+        $stats[$module] = [
+          'requests' => 0,
+          'prompt' => 0,
+          'completion' => 0,
+          'total_tokens' => 0,
+          'cost' => 0.0,
+        ];
+      }
+
+      $stats[$module]['requests'] += 1;
+      $stats[$module]['prompt'] += $row->prompt_tokens;
+      $stats[$module]['completion'] += $row->completion_tokens;
+      $stats[$module]['total_tokens'] += $row->total_tokens;
+      $stats[$module]['cost'] += $row->cost;
+    }
+
+    return $stats;
+  }
+  public function exportCsv() {
+    $filters = [
+      'user_id' => $this->request->query->get('user_id'),
+      'module' => $this->request->query->get('module'),
+      'model' => $this->request->query->get('model'),
+    ];
+
+    $query = $this->database->select('openai_usage_log', 'log')
+      ->fields('log')
+      ->orderBy('created', 'DESC');
+
+    foreach ($filters as $field => $value) {
+      if (!empty($value)) {
+        $query->condition("log.$field", $value);
+      }
+    }
+
+    $results = $query->execute();
+    $rows = [];
+
+    foreach ($results as $row) {
+      $rows[] = [
+        $row->id,
+        $row->module,
+        $row->user_id,
+        $row->model,
+        $row->endpoint,
+        $row->prompt_tokens,
+        $row->completion_tokens,
+        $row->total_tokens,
+        $row->cost,
+        $row->content_type ?? '',
+        $row->node_id ?? '',
+        $row->title ?? '',
+        date('Y-m-d H:i:s', $row->created),
+      ];
+    }
+
+    $header = [
+      'ID', 'Module', 'User ID', 'Model', 'Endpoint',
+      'Prompt Tokens', 'Completion Tokens', 'Total Tokens',
+      'Cost', 'Content Type', 'Node ID', 'Title', 'Created',
+    ];
+
+    $filename = 'openai-usage-' . date('Y-m-d') . '.csv';
+    $csv = fopen('php://temp', 'r+');
+    fputcsv($csv, $header);
+    foreach ($rows as $line) {
+      fputcsv($csv, $line);
+    }
+    rewind($csv);
+    $contents = stream_get_contents($csv);
+    fclose($csv);
+
+    return new \Symfony\Component\HttpFoundation\Response(
+      $contents,
+      200,
+      [
+        'Content-Type' => 'text/csv',
+        'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+      ]
+    );
+  }
 
 }

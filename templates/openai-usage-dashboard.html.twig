@@ -1,15 +1,104 @@
+{% if alert_message %}
+  <div class="dashboard-alert mb-4" style="
+    background-color: {{ alert_message.level == 'danger' ? '#fee2e2' : '#fef9c3' }};
+    border: 1px solid {{ alert_message.level == 'danger' ? '#f87171' : '#facc15' }};
+    color: {{ alert_message.level == 'danger' ? '#991b1b' : '#78350f' }};
+    padding: 1rem;
+    border-radius: 6px;
+    ">
+    {{ alert_message.text }}
+  </div>
+{% endif %}
+
+  <div class="container mb-4">
+    <div class="row">
+      <div class="col-md-3">
+        <a href="{{ path('openai_usage_tracker.export_csv', {
+          user_id: app.request.query.get('user_id'),
+          module: app.request.query.get('module'),
+          model: app.request.query.get('model')
+        }) }}" class="button button--primary" style="
+      background: #2563eb;
+      color: white;
+      padding: 0.5rem 1rem;
+      border-radius: 4px;
+      text-decoration: none;
+      font-weight: bold;
+    ">
+          📥 Download CSV
+        </a>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-md-4">{{ form.user_id }}</div>
+      <div class="col-md-4">{{ form.module }}</div>
+      <div class="col-md-4">{{ form.model }}</div>
+    </div>
+    <div class="row">
+      <div class="col-md-3">{{ form.actions }}</div>
+    </div>
+  </div>
+
+<div class="container">
+  <div class="row">
+
+  </div>
+</div>
+
 <div class="dashboard-endpoint-cards mb-4">
   <h3>Breakdown by Endpoint</h3>
-  <div class="endpoint-grid" style="display: flex; flex-wrap: wrap; gap: 1rem;">
+  <div class="grid" style="
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1rem;
+">
     {% for endpoint, stat in endpoint_stats %}
-      <div class="card" style="border: 1px solid #ddd; border-radius: 6px; padding: 1rem; width: 220px; background: #f9f9f9;">
-        <div style="font-weight: bold; font-size: 1.1rem;">{{ endpoint }}</div>
+      <div class="card" style="background: #f3e8ff; border: 1px solid #ddd; border-radius: 6px; padding: 1rem; width: 240px;">
+        <div style="font-weight: bold;">{{ endpoint }}</div>
         <div>Requests: {{ stat.requests }}</div>
         <div>Tokens: {{ stat.tokens|number_format }}</div>
         <div>Cost: ${{ stat.cost|number_format(4) }}</div>
       </div>
-    {% else %}
-      <p>No data found.</p>
+    {% endfor %}
+  </div>
+</div>
+
+<div class="dashboard-model-cards mb-4">
+  <h3>Breakdown by Model</h3>
+  <div class="grid" style="
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1rem;
+">
+    {% for model, stat in model_stats %}
+      <div class="card" style="background: #e0f2fe; border: 1px solid #bee3f8; border-radius: 6px; padding: 1rem; width: 240px;">
+        <div style="font-weight: bold;">{{ model }}</div>
+        <div>Requests: {{ stat.requests }}</div>
+        <div>Prompt Tokens: {{ stat.prompt|number_format }}</div>
+        <div>Completion Tokens: {{ stat.completion|number_format }}</div>
+        <div>Total Tokens: {{ stat.total_tokens|number_format }}</div>
+        <div>Cost: ${{ stat.cost|number_format(4) }}</div>
+      </div>
+    {% endfor %}
+  </div>
+</div>
+
+<div class="dashboard-module-cards mb-4">
+  <h3>Breakdown by Module</h3>
+  <div class="grid" style="
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1rem;
+">
+    {% for module, stat in module_stats %}
+      <div class="card" style="background: #fff9c4; border: 1px solid #fce7a4; border-radius: 6px; padding: 1rem; width: 240px;">
+        <div style="font-weight: bold;">{{ module }}</div>
+        <div>Requests: {{ stat.requests }}</div>
+        <div>Prompt Tokens: {{ stat.prompt|number_format }}</div>
+        <div>Completion Tokens: {{ stat.completion|number_format }}</div>
+        <div>Total Tokens: {{ stat.total_tokens|number_format }}</div>
+        <div>Cost: ${{ stat.cost|number_format(4) }}</div>
+      </div>
     {% endfor %}
   </div>
 </div>

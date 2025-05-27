@@ -5,3 +5,11 @@ openai_usage_tracker.dashboard:
     _title: 'OpenAI Usage Dashboard'
   requirements:
     _permission: 'access administration pages'
+
+openai_usage_tracker.export_csv:
+  path: '/admin/reports/openai-usage/export'
+  defaults:
+    _controller: '\Drupal\openai_usage_tracker\Controller\UsageDashboardController::exportCsv'
+    _title: 'Export OpenAI Usage CSV'
+  requirements:
+    _permission: 'access administration pages'

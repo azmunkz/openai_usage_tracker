@@ -39,6 +39,9 @@ class OpenAIUsageLogger {
       'completion_tokens' => $data['completion_tokens'] ?? 0,
       'total_tokens' => $data['total_tokens'] ?? 0,
       'cost' => $data['cost'] ?? 0,
+      'content_type' => $options['content_type'] ?? NULL,
+      'node_id' => $options['node_id'] ?? NULL,
+      'title' => $options['title'] ?? NULL,
       'created' => \Drupal::time()->getCurrentTime(),
     ])->execute();
   }

@@ -68,7 +68,9 @@ class FilterForm extends FormBase {
 
     $form['actions'] = [
       '#type' => 'actions',
+      '#title' => $this->t('&nbsp;'),
     ];
+
     $form['actions']['submit'] = [
       '#type' => 'submit',
       '#value' => $this->t('Filter'),
